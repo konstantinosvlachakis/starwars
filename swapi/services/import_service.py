@@ -7,8 +7,11 @@ def extract_swapi_id(url):
 def parse_integer(value):
     if not value or value == "unknown":
         return None
-    clean_value = value.replace(",", "")
-    return int(clean_value)
+    try:
+        clean_value = value.replace(",", "")
+        return int(clean_value)
+    except ValueError:
+        return None
     
 class ImportService:
     
@@ -16,12 +19,15 @@ class ImportService:
         self.client = SWAPIClient()
         
     def import_films(self):
-        films = self.client.fetc_all("films/")
-        
+        films = self.client.fetch_all("films/")
+
+        created_count = 0
+        updated_count = 0
+
         for film in films:
-            url = film["url"]
-            film_obj, created = Film.objects.update_or_create(
-                swapi_id = extract_swapi_id(url),
+
+            _, created = Film.objects.update_or_create(
+                swapi_id=extract_swapi_id(film["url"]),
                 defaults={
                     "title": film["title"],
                     "director": film["director"],
@@ -31,15 +37,30 @@ class ImportService:
                     "release_date": film["release_date"],
                 },
             )
+
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+
+        return {
+            "total": len(films),
+            "created": created_count,
+            "updated": updated_count,
+        }
+        
             
     
     def import_characters(self):
         characters = self.client.fetch_all("people/")
         
+        created_count = 0
+        updated_count = 0
+        
         for character in characters:
-            url = character["url"]
+            
             character_obj, created = Character.objects.update_or_create(
-                swapi_id = extract_swapi_id(url),
+                swapi_id=extract_swapi_id(character["url"]),
                 defaults={
                     "name": character["name"],
                     "height": parse_integer(character["height"]),
@@ -60,3 +81,59 @@ class ImportService:
             films = Film.objects.filter(swapi_id__in=film_ids)
             
             character_obj.films.set(films)
+            
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+            
+        return {
+            "total": len(characters),
+            "created": created_count,
+            "updated": updated_count,
+        }
+            
+        
+    def import_starships(self):
+        starships = self.client.fetch_all("starships/")
+        
+        
+        created_count = 0
+        updated_count = 0
+        
+        for starship in starships:
+            
+            starship_obj, created = Starship.objects.update_or_create(
+                swapi_id=extract_swapi_id(starship["url"]),
+                defaults={
+                    "name": starship["name"],
+                    "model": starship["model"],
+                    "cost_in_credits": parse_integer(starship["cost_in_credits"]),
+                    "length": parse_integer(starship["length"]),
+                    "manufacturer": starship["manufacturer"],
+                    "crew": starship["crew"],
+                    "passengers": starship["passengers"],
+                },
+            )
+            
+            film_ids = [
+                extract_swapi_id(film_url)
+                for film_url in starship["films"]
+            ]
+            
+            films = Film.objects.filter(swapi_id__in=film_ids)
+            
+            starship_obj.films.set(films)
+            
+            
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+            
+        return {
+            "total": len(starships),
+            "created": created_count,
+            "updated": updated_count,
+        }
+            

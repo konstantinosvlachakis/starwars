@@ -5,8 +5,8 @@ from django.db import models
 class Character(models.Model):
     swapi_id = models.IntegerField(unique=True)
     name = models.CharField(max_length=255)
-    height = models.PositiveIntegerField()
-    mass = models.PositiveIntegerField()
+    height = models.PositiveIntegerField(null=True, blank=True)
+    mass = models.PositiveIntegerField(null=True, blank=True)
     hair_color = models.CharField(max_length=255)
     skin_color = models.CharField(max_length=255)
     eye_color = models.CharField(max_length=255)
