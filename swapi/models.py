@@ -4,6 +4,7 @@ from django.db import models
 
 class Character(models.Model):
     swapi_id = models.IntegerField(unique=True)
+    votes = models.PositiveIntegerField(default=0)
     name = models.CharField(max_length=255)
     height = models.PositiveIntegerField(null=True, blank=True)
     mass = models.PositiveIntegerField(null=True, blank=True)
@@ -24,6 +25,7 @@ class Character(models.Model):
 
 class Film(models.Model):
     swapi_id = models.IntegerField(unique=True)
+    votes = models.PositiveIntegerField(default=0)
     title = models.CharField(max_length=255)
     director = models.CharField(max_length=255)
     producer = models.CharField(max_length=255)
@@ -37,6 +39,7 @@ class Film(models.Model):
 
 class Starship(models.Model):
     swapi_id = models.IntegerField(unique=True)
+    votes = models.PositiveIntegerField(default=0)
     name = models.CharField(max_length=255)
     model = models.CharField(max_length=255)
     cost_in_credits = models.BigIntegerField(
