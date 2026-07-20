@@ -1,5 +1,6 @@
 from swapi.models import Film, Character, Starship
 from swapi.services.client import SWAPIClient
+from django.db import transaction
 
 def extract_swapi_id(url):
     return int(url.rstrip("/").split("/")[-1])
@@ -136,4 +137,15 @@ class ImportService:
             "created": created_count,
             "updated": updated_count,
         }
-            
+        
+    @transaction.atomic       
+    def import_all(self):
+        films_result = self.import_films()
+        characters_result = self.import_characters()
+        starships_result = self.import_starships()
+
+        return {
+            "films": films_result,
+            "characters": characters_result,
+            "starships": starships_result,
+        }
