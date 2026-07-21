@@ -152,3 +152,23 @@ The report will be created in `htmlcov/index.html`. On Windows, it can be opened
 ```powershell
 Start-Process ".\htmlcov\index.html"
 ```
+
+An XML coverage report can be generated for CI tools or submission with:
+
+```bash
+coverage xml -o coverage.xml
+```
+
+The XML file can be opened in VS Code:
+
+```powershell
+code coverage.xml
+```
+
+or in the default browser on Windows:
+
+```powershell
+Start-Process ".\coverage.xml"
+```
+
+The XML report is intended mainly for automated tools. The HTML report is more convenient for viewing coverage details manually.
