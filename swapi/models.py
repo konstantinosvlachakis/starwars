@@ -46,7 +46,9 @@ class Starship(models.Model):
         null=True,
         blank=True
     )
-    length = models.PositiveIntegerField(
+    length = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
         null=True,
         blank=True,
     )

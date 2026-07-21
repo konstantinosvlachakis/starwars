@@ -1,3 +1,5 @@
+from decimal import Decimal, InvalidOperation
+
 from swapi.models import Film, Character, Starship
 from swapi.services.client import SWAPIClient
 from django.db import transaction
@@ -14,6 +16,15 @@ def parse_integer(value):
     except ValueError:
         return None
     
+def parse_decimal(value):
+    if not value or value == 'unknown':
+        return None
+    try:
+        return Decimal(value.replace(',', ''))
+    except InvalidOperation:
+        return None
+
+
 class ImportService:
     
     def __init__(self):
@@ -110,7 +121,7 @@ class ImportService:
                     "name": starship["name"],
                     "model": starship["model"],
                     "cost_in_credits": parse_integer(starship["cost_in_credits"]),
-                    "length": parse_integer(starship["length"]),
+                    "length": parse_decimal(starship["length"]),
                     "manufacturer": starship["manufacturer"],
                     "crew": starship["crew"],
                     "passengers": starship["passengers"],
