@@ -72,14 +72,14 @@ class SWAPIImportAPIView(APIView):
         return Response(result, status=status.HTTP_200_OK)
     
 class CharacterListAPIView(ListAPIView):
-    queryset = Character.objects.all()
+    queryset = Character.objects.all().order_by("id")
     serializer_class = CharacterSerializer    
     filter_backends = [SearchFilter]
     search_fields = ["name"]
     
 
 class FilmListAPIView(ListAPIView):
-    queryset = Film.objects.all()
+    queryset = Film.objects.all().order_by("id")
     serializer_class = FilmSerializer    
     filter_backends = [SearchFilter]
     search_fields = ["title"]
@@ -87,7 +87,7 @@ class FilmListAPIView(ListAPIView):
     
 
 class StarshipListAPIView(ListAPIView):
-    queryset = Starship.objects.all()
+    queryset = Starship.objects.all().order_by("id")
     serializer_class = StarshipSerializer
     filter_backends = [SearchFilter]
     search_fields = ["name", "model"]
