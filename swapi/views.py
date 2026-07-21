@@ -4,14 +4,32 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.filters import SearchFilter
 from django.db.models import F
+from drf_spectacular.utils import extend_schema
 from swapi.services.import_service import ImportService
 from .models import Character, Film, Starship
-from .serializers import CharacterSerializer, FilmSerializer, StarshipSerializer
+from .serializers import (
+    CharacterSerializer,
+    ErrorResponseSerializer,
+    FilmSerializer,
+    ImportResultSerializer,
+    StarshipSerializer,
+    VoteResponseSerializer,
+)
 # Create your views here.
 
 
 class SWAPIImportAPIView(APIView):
-    
+
+    @extend_schema(
+        summary='Import all SWAPI resources',
+        description=(
+            'Fetch films, characters, and starships from SWAPI and upsert '
+            'them into the local database.'
+        ),
+        request=None,
+        responses={200: ImportResultSerializer},
+        tags=['Import'],
+    )
     def post(self, request):
         service = ImportService()
         result = service.import_all()
@@ -41,7 +59,13 @@ class StarshipListAPIView(ListAPIView):
     
 
 class CharacterVoteAPIView(APIView):
-    
+
+    @extend_schema(
+        summary='Vote for a character',
+        request=None,
+        responses={200: VoteResponseSerializer, 404: ErrorResponseSerializer},
+        tags=['Voting'],
+    )
     def post(self, request, character_id):
         try:
             character = Character.objects.get(id=character_id)
@@ -54,7 +78,13 @@ class CharacterVoteAPIView(APIView):
     
 
 class FilmVoteAPIView(APIView):
-    
+
+    @extend_schema(
+        summary='Vote for a film',
+        request=None,
+        responses={200: VoteResponseSerializer, 404: ErrorResponseSerializer},
+        tags=['Voting'],
+    )
     def post(self, request, film_id):
         try:
             film = Film.objects.get(id=film_id)
@@ -66,7 +96,13 @@ class FilmVoteAPIView(APIView):
         return Response({"message": f"Vote registered for {film.title}."}, status=status.HTTP_200_OK)
     
 class StarshipVoteAPIView(APIView):
-    
+
+    @extend_schema(
+        summary='Vote for a starship',
+        request=None,
+        responses={200: VoteResponseSerializer, 404: ErrorResponseSerializer},
+        tags=['Voting'],
+    )
     def post(self, request, starship_id):
         try:
             starship = Starship.objects.get(id=starship_id)

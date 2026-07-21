@@ -17,6 +17,26 @@ class FilmSerializer(serializers.ModelSerializer):
         fields = "__all__"
         
 
+class ImportResourceSummarySerializer(serializers.Serializer):
+    total = serializers.IntegerField()
+    created = serializers.IntegerField()
+    updated = serializers.IntegerField()
+
+
+class ImportResultSerializer(serializers.Serializer):
+    films = ImportResourceSummarySerializer()
+    characters = ImportResourceSummarySerializer()
+    starships = ImportResourceSummarySerializer()
+
+
+class VoteResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()
+
+
+class ErrorResponseSerializer(serializers.Serializer):
+    error = serializers.CharField()
+
+
 class StarshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Starship
