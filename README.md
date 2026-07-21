@@ -139,7 +139,7 @@ coverage run --source=swapi --omit=swapi/tests.py,swapi/migrations/* manage.py t
 coverage report -m
 ```
 
-The current test suite contains 27 tests and reports 91% coverage of the application code.
+The current test suite contains 28 tests and reports 91% coverage of the application code.
 
 An HTML coverage report can also be generated:
 

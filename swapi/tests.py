@@ -506,6 +506,49 @@ class SWAPIImportTestCase(APITestCase):
             "Database error during SWAPI import."
         )
 
+    @patch("swapi.services.import_service.SWAPIClient.fetch_all")
+    def test_swapi_import_returns_502_and_rolls_back_for_invalid_record(
+        self,
+        mock_fetch_all,
+    ):
+        mock_fetch_all.return_value = [
+            {
+                "url": "https://swapi.dev/api/films/1/",
+                "title": "A New Hope",
+                "director": "George Lucas",
+                "producer": "Gary Kurtz",
+                "episode_id": 4,
+                "opening_crawl": "It is a period of civil war...",
+                "release_date": "1977-05-25",
+            },
+            {
+                "url": "https://swapi.dev/api/films/2/",
+                "director": "Irvin Kershner",
+                "producer": "Gary Kurtz",
+                "episode_id": 5,
+                "opening_crawl": "It is a dark time...",
+                "release_date": "1980-05-21",
+            },
+        ]
+
+        url = reverse("swapi-import")
+        response = self.client.post(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_502_BAD_GATEWAY,
+        )
+        self.assertEqual(
+            response.data,
+            {
+                "error": (
+                    "SWAPI returned incomplete or invalid resource data."
+                )
+            },
+        )
+        self.assertEqual(Film.objects.count(), 0)
+        mock_fetch_all.assert_called_once_with("films/")
+
 
 
 class SWAPIClientTestCase(SimpleTestCase):

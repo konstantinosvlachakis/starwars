@@ -1,8 +1,10 @@
 from decimal import Decimal, InvalidOperation
 
-from swapi.models import Film, Character, Starship
-from swapi.services.client import SWAPIClient
+from django.core.exceptions import ValidationError
 from django.db import transaction
+
+from swapi.models import Film, Character, Starship
+from swapi.services.client import SWAPIClient, SWAPIResponseError
 
 def extract_swapi_id(url):
     return int(url.rstrip("/").split("/")[-1])
@@ -151,9 +153,14 @@ class ImportService:
         
     @transaction.atomic       
     def import_all(self):
-        films_result = self.import_films()
-        characters_result = self.import_characters()
-        starships_result = self.import_starships()
+        try:
+            films_result = self.import_films()
+            characters_result = self.import_characters()
+            starships_result = self.import_starships()
+        except (KeyError, TypeError, ValueError, ValidationError) as exc:
+            raise SWAPIResponseError(
+                "SWAPI returned incomplete or invalid resource data."
+            ) from exc
 
         return {
             "films": films_result,
