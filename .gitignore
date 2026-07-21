@@ -5,6 +5,8 @@
 __pycache__/
 *.py[cod]
 *.pyo
+.coverage
+htmlcov/
 
 # Django
 db.sqlite3

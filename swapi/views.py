@@ -15,6 +15,11 @@ from .serializers import (
     StarshipSerializer,
     VoteResponseSerializer,
 )
+
+from swapi.services.client import (
+    SWAPIRequestError,
+    SWAPIResponseError,
+)
 # Create your views here.
 
 
@@ -27,13 +32,29 @@ class SWAPIImportAPIView(APIView):
             'them into the local database.'
         ),
         request=None,
-        responses={200: ImportResultSerializer},
+        responses={
+            200: ImportResultSerializer,
+            502: ErrorResponseSerializer,
+            503: ErrorResponseSerializer,
+        },
         tags=['Import'],
     )
     def post(self, request):
         service = ImportService()
-        result = service.import_all()
         
+        try:
+            result = service.import_all()
+        except SWAPIRequestError as exc:
+            return Response(
+                {"error": str(exc)},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except SWAPIResponseError as exc:
+            return Response(
+                {"error": str(exc)},
+                status=status.HTTP_502_BAD_GATEWAY
+                )   
+
         return Response(result, status=status.HTTP_200_OK)
     
 class CharacterListAPIView(ListAPIView):
