@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import requests
+from django.db import DatabaseError
 from django.test import SimpleTestCase
 
 from django.urls import reverse
@@ -477,6 +478,33 @@ class SWAPIImportTestCase(APITestCase):
             response.data["error"], "SWAPI returned an invalid JSON response."
         )
         mock_import_all.assert_called_once_with()
+
+    @patch("swapi.views.logger.exception")
+    @patch("swapi.views.ImportService.import_all")
+    def test_swapi_import_returns_500_when_database_fails(
+        self,
+        mock_import_all,
+        mock_log_exception,
+    ):
+        mock_import_all.side_effect = DatabaseError(
+            "Database connection failed."
+        )
+
+        url = reverse("swapi-import")
+        response = self.client.post(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+        self.assertEqual(
+            response.data,
+            {"error": "A database error occurred during the import."},
+        )
+        mock_import_all.assert_called_once_with()
+        mock_log_exception.assert_called_once_with(
+            "Database error during SWAPI import."
+        )
 
 
 

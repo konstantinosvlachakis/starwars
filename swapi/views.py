@@ -1,3 +1,6 @@
+import logging
+
+from django.db import DatabaseError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,6 +23,10 @@ from swapi.services.client import (
     SWAPIRequestError,
     SWAPIResponseError,
 )
+
+
+logger = logging.getLogger(__name__)
+
 # Create your views here.
 
 
@@ -34,6 +41,7 @@ class SWAPIImportAPIView(APIView):
         request=None,
         responses={
             200: ImportResultSerializer,
+            500: ErrorResponseSerializer,
             502: ErrorResponseSerializer,
             503: ErrorResponseSerializer,
         },
@@ -52,8 +60,14 @@ class SWAPIImportAPIView(APIView):
         except SWAPIResponseError as exc:
             return Response(
                 {"error": str(exc)},
-                status=status.HTTP_502_BAD_GATEWAY
-                )   
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+        except DatabaseError:
+            logger.exception("Database error during SWAPI import.")
+            return Response(
+                {"error": "A database error occurred during the import."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(result, status=status.HTTP_200_OK)
     
